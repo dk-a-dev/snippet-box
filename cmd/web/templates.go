@@ -4,14 +4,16 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
-	"snippetbox.dkadev.net/internal/models"
 	"time"
+
+	"snippetbox.dkadev.net/internal/models"
 )
 
 type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+	Form any
 }
 
 func humanDate(t time.Time) string {
