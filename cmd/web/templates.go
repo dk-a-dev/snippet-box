@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/justinas/nosurf"
 	"snippetbox.dkadev.net/internal/models"
 )
 
@@ -16,6 +17,7 @@ type templateData struct {
 	Form            any
 	Flash           string
 	IsAuthenticated bool
+	CSRFToken       string
 }
 
 func humanDate(t time.Time) string {
@@ -59,11 +61,12 @@ func newTemplateCache() (map[string]*template.Template, error) {
 
 func (app *application) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
-		CurrentYear: time.Now().Year(),
-		Snippet:     nil,
-		Snippets:    nil,
-		Form:        nil,
-		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
+		CurrentYear:     time.Now().Year(),
+		Snippet:         nil,
+		Snippets:        nil,
+		Form:            nil,
+		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 }

@@ -11,6 +11,8 @@ require (
 
 require golang.org/x/crypto v0.24.0
 
+require github.com/justinas/nosurf v1.1.1
+
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
