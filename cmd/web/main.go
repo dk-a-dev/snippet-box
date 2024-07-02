@@ -66,9 +66,11 @@ func main() {
 		templateCache:  templateCache,
 		sessionManager: sessionManager,
 	}
+
 	tlsConfig := &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
+	
 	srv := &http.Server{
 		Addr:         cfg.addr,
 		ErrorLog:     errorLog,
