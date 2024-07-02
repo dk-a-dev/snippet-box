@@ -147,7 +147,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 			data := app.newTemplateData(r)
 			data.Form = form
 			app.render(w, http.StatusUnprocessableEntity, "signup.html", data)
-		}else{
+		} else {
 			app.serverError(w, err)
 		}
 		return
@@ -155,7 +155,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
 
-	fmt.Fprintln(w, "Create a new user...")
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
