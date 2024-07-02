@@ -3,11 +3,17 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"time"
+
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	_ "github.com/go-sql-driver/mysql"
+
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+
 	"snippetbox.dkadev.net/internal/models"
 )
 
@@ -18,10 +24,11 @@ type config struct {
 }
 
 type application struct {
-	errorLog      *log.Logger
-	infoLog       *log.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -44,12 +51,16 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
 
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
 		snippets:      &models.SnippetModel{DB: db},
 		templateCache: templateCache,
+		sessionManager: sessionManager,
 	}
 
 	srv := &http.Server{
