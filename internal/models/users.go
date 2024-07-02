@@ -30,14 +30,39 @@ func (m *UserModel) Insert(name, email, password string) error {
 	stmt := `INSERT INTO users (name, email, hashed_password, created) VALUES(?, ?, ?, UTC_TIMESTAMP())`
 	_, err = m.DB.Exec(stmt, name, email, hashedPassword)
 
-	if err!=nil {
+	if err != nil {
 		var mySQLError *mysql.MySQLError
-		if errors.As(err,&mySQLError) {
-			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message,"users_uc_email"){
+		if errors.As(err, &mySQLError) {
+			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_uc_email") {
 				return ErrDuplicateEmail
 			}
 		}
 		return err
 	}
 	return nil
+}
+
+func (m *UserModel) Authenticate(email, password string) (int, error) {
+	var id int
+	var hashedPassword []byte
+	row := m.DB.QueryRow("SELECT id, hashed_password FROM users WHERE email = ?", email)
+	err := row.Scan(&id, &hashedPassword)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrInvalidCredentials
+		}
+		return 0, err
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+	
+	return id, nil
 }
