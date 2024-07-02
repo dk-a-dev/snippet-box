@@ -9,7 +9,7 @@ require (
 	github.com/alexedwards/scs/v2 v2.8.0
 )
 
-require golang.org/x/crypto v0.24.0 // indirect
+require golang.org/x/crypto v0.24.0
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
