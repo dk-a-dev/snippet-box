@@ -34,6 +34,48 @@ func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "account.html", data)
 }
 
+type passwordUpdateForm struct {
+	CurrentPassword string
+	NewPassword     string
+	ConfirmPassword string
+	validator.Validator
+}
+
+func (app *application) accountPasswordUpdate(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = passwordUpdateForm{}
+	app.render(w, http.StatusOK, "password.html", data)
+}
+
+func (app *application) accountPasswordUpdatePost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := passwordUpdateForm{
+		CurrentPassword: r.PostForm.Get("currentPassword"),
+		NewPassword:     r.PostForm.Get("newPassword"),
+		ConfirmPassword: r.PostForm.Get("newPasswordConfirmation"),
+	}
+
+	form.CheckField(validator.NotBlank(form.CurrentPassword), "currentPassword", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.NewPassword), "newPassword", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.NewPassword, 8), "newPassword", "This field must be at least 8 characters long")
+	form.CheckField(validator.NotBlank(form.ConfirmPassword), "newPasswordConfirmation", "This field cannot be blank")
+	form.CheckField(validator.MatchPasswords(form.NewPassword, form.ConfirmPassword), "newPasswordConfirmation", "This field must match the new password")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, http.StatusUnprocessableEntity, "password.html", data)
+	}
+
+	// http.Redirect(w, r, "/account", http.StatusSeeOther)
+
+}
+
 type snippetCreateForm struct {
 	Title   string
 	Content string
