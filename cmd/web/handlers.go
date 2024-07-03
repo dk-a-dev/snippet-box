@@ -12,6 +12,12 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+
+func (app *application) about(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "about.html", data)
+}
+
 type snippetCreateForm struct {
 	Title   string
 	Content string
