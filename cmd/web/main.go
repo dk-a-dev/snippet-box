@@ -25,6 +25,7 @@ type config struct {
 }
 
 type application struct {
+	debug          bool
 	errorLog       *log.Logger
 	infoLog        *log.Logger
 	snippets       *models.SnippetModel
@@ -38,6 +39,7 @@ func main() {
 	flag.StringVar(&cfg.addr, "addr", ":4000", "HTTP Network Address")
 	flag.StringVar(&cfg.staticDir, "static-dir", "./ui/static", "Path to static assets")
 	flag.StringVar(&cfg.dsn, "dsn", "web:Local-user123@@/snippetbox?parseTime=true", "MySQL data source name")
+	debug := flag.Bool("debug", false, "Enable Debug Mode on Browser")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -59,6 +61,7 @@ func main() {
 	sessionManager.Cookie.Secure = true
 
 	app := &application{
+		debug:          *debug,
 		errorLog:       errorLog,
 		infoLog:        infoLog,
 		snippets:       &models.SnippetModel{DB: db},
@@ -70,7 +73,7 @@ func main() {
 	tlsConfig := &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
-	
+
 	srv := &http.Server{
 		Addr:         cfg.addr,
 		ErrorLog:     errorLog,
